@@ -47,8 +47,13 @@ def format_prediction_response(top3_predictions, skills_dict):
             "missingMustHave":
                 gap["missing_skills"],
 
-            "missingGoodToHave": [],
+            "missingGoodToHave":
+                gap["missing_optional_skills"],
 
+            # No third skill tier exists in career_requirements.csv
+            # (only Required/Optional), so there's nothing real to put
+            # here yet. Left empty rather than duplicating
+            # missingGoodToHave or inventing data.
             "missingOptional": [],
 
             "roadmap": roadmap

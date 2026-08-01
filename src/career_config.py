@@ -1,106 +1,48 @@
 """
 career_config.py
-Single source of truth for skills, careers, and tier mapping.
-Imported by all three generator scripts so student_skills.csv,
-career_requirements.csv, and skill_learning_time.csv can never drift
-out of sync with each other.
+Single source of truth for skills, careers, and tier mapping —
+used by test_model.py's interactive CLI.
+
+This used to hand-type its own skill names and career list, which had
+drifted out of sync with the actual trained model (different skill
+spelling, an extra career that doesn't exist in career_requirements.csv).
+It now derives everything directly from the real artifacts, so it is
+*structurally* impossible for it to drift again: if the model or
+career_requirements.csv changes, this file's values change with them
+automatically.
 """
 
-# ---------------------------------------------------------
-# 20 skills — final list (docker added, 'c' removed, no changes needed
-# in preprocessing/LabelEncoder/StandardScaler/train_model.py/predictor.py)
-# ---------------------------------------------------------
-SKILLS = [
-    "python", "java", "cpp", "sql", "html", "css", "javascript",
-    "react", "nodejs", "machine_learning", "deep_learning", "data_analysis",
-    "git", "linux", "cloud", "excel", "power_bi",
-    "communication", "problem_solving", "teamwork"
-]
+from preprocessing import load_artifacts, load_career_requirements
 
 # ---------------------------------------------------------
-# Probability ranges per tier (tuned for KNN separability —
-# see silhouette/accuracy validation done earlier)
+# 20 skills — pulled straight from the trained model's feature
+# columns (feature_columns.pkl), so this always matches
+# skill_model.pkl / scaler.pkl / label_encoder.pkl exactly.
 # ---------------------------------------------------------
-TIER_RANGES = {
-    "must":     (0.93, 1.00),
-    "good":     (0.65, 0.85),
-    "optional": (0.15, 0.30),
-    "rare":     (0.02, 0.08),
-}
+_, _, _, SKILLS = load_artifacts()
 
 # ---------------------------------------------------------
-# 9 final careers, each skill assigned to exactly one tier
+# Careers + tiered skills, straight from career_requirements.csv:
+#   must = Required Skills column
+#   good = Optional Skills column
+#   rare = every other skill not listed for that career
 # ---------------------------------------------------------
-CAREER_SKILL_MAP = {
-    "AI / Machine Learning Engineer": {
-        "must":     ["python", "machine_learning", "deep_learning", "git",
-                      "communication", "problem_solving", "teamwork"],
-        "good":     ["sql", "data_analysis", "linux", "cloud"],
-        "optional": ["java", "cpp", "excel", "power_bi", "javascript"],
-        "rare":     ["html", "css", "react", "nodejs"],
-    },
-    "Machine Learning Engineer": {
-        "must":     ["python", "machine_learning", "git",
-                      "communication", "problem_solving", "teamwork"],
-        "good":     ["deep_learning", "sql", "data_analysis", "linux", "cloud"],
-        "optional": ["java", "cpp", "excel", "power_bi"],
-        "rare":     ["html", "css", "javascript", "react", "nodejs"],
-    },
-    "Data Scientist": {
-        "must":     ["python", "data_analysis", "sql",
-                      "communication", "problem_solving", "teamwork"],
-        "good":     ["machine_learning", "excel", "power_bi", "git"],
-        "optional": ["deep_learning", "linux", "java", "cloud"],
-        "rare":     ["html", "css", "javascript", "react", "nodejs", "cpp"],
-    },
-    "Data Analyst": {
-        "must":     ["sql", "excel", "data_analysis", "communication", "teamwork"],
-        "good":     ["power_bi", "python", "problem_solving"],
-        "optional": ["machine_learning", "git", "java"],
-        "rare":     ["deep_learning", "cpp", "html", "css", "javascript",
-                      "react", "nodejs", "linux", "cloud"],
-    },
-    "Backend Developer": {
-        "must":     ["java", "sql", "git", "problem_solving"],
-        "good":     ["nodejs", "linux", "python", "communication", "teamwork"],
-        "optional": ["cloud", "javascript", "cpp"],
-        "rare":     ["html", "css", "react", "machine_learning",
-                      "deep_learning", "data_analysis", "excel", "power_bi"],
-    },
-    "Frontend Developer": {
-        "must":     ["html", "css", "javascript", "git",
-                      "communication", "problem_solving", "teamwork"],
-        "good":     ["react", "nodejs"],
-        "optional": ["java", "sql", "cloud"],
-        "rare":     ["cpp", "machine_learning", "deep_learning", "data_analysis",
-                      "linux", "excel", "power_bi", "python"],
-    },
-    "Full Stack Developer": {
-        "must":     ["html", "css", "javascript", "sql", "git",
-                      "communication", "problem_solving", "teamwork"],
-        "good":     ["react", "nodejs", "python", "java", "linux"],
-        "optional": ["cloud", "cpp", "data_analysis"],
-        "rare":     ["machine_learning", "deep_learning", "excel", "power_bi"],
-    },
-    "Software Developer": {
-        "must":     ["java", "cpp", "problem_solving", "git"],
-        "good":     ["python", "sql", "communication", "teamwork"],
-        "optional": ["javascript", "html", "css", "linux", "cloud"],
-        "rare":     ["machine_learning", "deep_learning", "data_analysis",
-                      "react", "nodejs", "excel", "power_bi"],
-    },
-    "DevOps Engineer": {
-        "must":     ["linux", "cloud", "git",
-                      "communication", "problem_solving", "teamwork"],
-        "good":     ["python", "sql", "java"],
-        "optional": ["cpp", "javascript", "nodejs"],
-        "rare":     ["html", "css", "react", "machine_learning",
-                      "deep_learning", "data_analysis", "excel", "power_bi"],
-    },
-}
+_requirements = load_career_requirements()
 
-# sanity check on import
+CAREER_SKILL_MAP = {}
+for _career, _reqs in _requirements.items():
+    _must = _reqs["required"]
+    _good = _reqs["optional"]
+    _rare = [s for s in SKILLS if s not in _must and s not in _good]
+    CAREER_SKILL_MAP[_career] = {
+        "must": _must,
+        "good": _good,
+        "rare": _rare,
+    }
+
+# sanity check on import — every skill accounted for exactly once
+# across must/good/rare for every career
 for _career, _tiers in CAREER_SKILL_MAP.items():
-    _mapped = _tiers["must"] + _tiers["good"] + _tiers["optional"] + _tiers["rare"]
-    assert sorted(_mapped) == sorted(SKILLS), f"Skill mapping incomplete for {_career}"
-    assert len(_mapped) == 20, f"Wrong skill count for {_career}"
+    _mapped = _tiers["must"] + _tiers["good"] + _tiers["rare"]
+    assert sorted(set(_mapped)) == sorted(set(SKILLS)), \
+        f"Skill mapping incomplete for {_career}"

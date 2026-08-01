@@ -45,9 +45,18 @@ def skill_gap_analysis(skills_dict, target_career):
         raise ValueError(f"Unknown career: {target_career}")
 
     required_skills = career_requirements[target_career]["required"]
+    optional_skills = career_requirements[target_career]["optional"]
 
     missing_skills = [
         skill for skill in required_skills
+        if skills_dict.get(skill, 0) == 0
+    ]
+
+    # "Good to have" skills: optional for this career and the student
+    # doesn't have them yet. These don't count toward readiness/roadmap —
+    # they're purely informational, unlike missing_skills (must-haves).
+    missing_optional_skills = [
+        skill for skill in optional_skills
         if skills_dict.get(skill, 0) == 0
     ]
 
@@ -66,7 +75,9 @@ def skill_gap_analysis(skills_dict, target_career):
     return {
         "target_career": target_career,
         "required_skills": required_skills,
+        "optional_skills": optional_skills,
         "missing_skills": missing_skills,
+        "missing_optional_skills": missing_optional_skills,
         "matched_count": matched_count,
         "total_required": len(required_skills),
         "readiness_percent": readiness_percent,
