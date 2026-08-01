@@ -1,0 +1,13 @@
+Career,Required Skills,Optional Skills
+AI / Machine Learning Engineer,"Python, Machine Learning, Deep Learning, SQL, Data Analytics","Cloud Computing, Git, Excel"
+Data Scientist,"Python, SQL, Excel, Data Analytics, Machine Learning","Deep Learning, Cloud Computing, Git"
+Data Analyst,"Excel, SQL, Python, Data Analytics","Machine Learning, Git"
+Full Stack Developer,"HTML, CSS, JavaScript, React, Node.js, SQL","Git, Database Design"
+Frontend Developer,"HTML, CSS, JavaScript, React, UI/UX Design",Git
+Backend Developer,"Python, SQL, Node.js, Database Design","Git, Linux, Java"
+Cyber Security Analyst,"Cyber Security, Networking, Linux, Python","Cloud Computing, Git, SQL"
+Cloud Engineer,"Cloud Computing, Linux, Networking","Python, Git"
+DevOps Engineer,"Linux, Git, Cloud Computing, Networking","Python, Node.js"
+Software Developer,"Java, C++, SQL, Git","Python, Database Design"
+UI/UX Designer,"UI/UX Design, HTML, CSS, JavaScript",React
+Database Administrator,"SQL, Database Design, Linux","Python, Git"

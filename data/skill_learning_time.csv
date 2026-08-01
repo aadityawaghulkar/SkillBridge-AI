@@ -1,0 +1,21 @@
+Skill,Beginner_Weeks,Intermediate_Weeks,JobReady_Weeks,Difficulty
+Python,3,8,18,Medium
+Java,4,9,18,Hard
+C++,4,10,20,Hard
+JavaScript,3,8,16,Medium
+HTML,1,3,6,Easy
+CSS,2,4,8,Easy
+React,3,7,14,Medium
+Node.js,3,7,14,Medium
+SQL,2,5,10,Medium
+Database Design,2,5,10,Medium
+Machine Learning,5,10,20,Hard
+Deep Learning,6,12,24,Hard
+Data Analytics,3,7,14,Medium
+Excel,1,3,6,Easy
+Cloud Computing,4,9,18,Hard
+Linux,2,5,10,Medium
+Networking,3,6,12,Medium
+Cyber Security,4,9,18,Hard
+Git,1,2,4,Easy
+UI/UX Design,3,6,12,Medium

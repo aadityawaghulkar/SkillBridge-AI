@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillBridge AI</title>
+  <meta name="description" content="AI-powered career match and skill gap predictor tool utilizing k-Nearest Neighbors (KNN) algorithms to analyze skill signals and optimize learning roadmaps.">
+  
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='assets/favicon.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <!-- Inline Minimum 2.5s Display Loader Script -->
+  <script>
+    window.__loaderStartTime = Date.now();
+    (function() {
+      function safeDismiss() {
+        var elapsed = Date.now() - (window.__loaderStartTime || Date.now());
+        var delay = Math.max(0, 2500 - elapsed);
+        setTimeout(function() {
+          var loader = document.getElementById('app-loader');
+          if (loader && !loader.classList.contains('hidden')) {
+            loader.classList.add('hidden');
+            document.body.classList.remove('loading-locked');
+            setTimeout(function() { loader.style.display = 'none'; }, 650);
+          }
+        }, delay);
+      }
+      window.addEventListener('load', safeDismiss);
+      setTimeout(safeDismiss, 3500);
+    })();
+  </script>
+</head>
+<body class="loading-locked">
+
+  <!-- Custom Tech-Inspired Cursor System -->
+  <div id="custom-cursor-dot"></div>
+  <div id="custom-cursor-ring"></div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Ambient Glow Effects & Grid -->
+  <div class="bg-grid"></div>
+  <div class="glow-blob glow-1"></div>
+  <div class="glow-blob glow-2"></div>
+
+  <!-- Loading Splash Screen -->
+  <div id="app-loader">
+    <div class="loader-content">
+
+        <img src="{{ url_for('static', filename='assets/logo.png') }}"
+             class="loader-logo"
+             alt="SkillBridge AI Logo">
+
+        <h1 class="loader-title">SkillBridge AI</h1>
+
+        <p class="loader-status" id="loader-status">
+            Initializing AI Engine...
+        </p>
+
+        <div class="loader-progress">
+            <div class="loader-progress-fill" id="loader-progress-fill"></div>
+        </div>
+
+        <p class="loader-subtitle">
+            AI-Powered Career Intelligence
+        </p>
+
+    </div>
+  </div>
+
+  <!-- Sticky Header Navigation -->
+  <header>
+    <a href="#" class="logo" id="logo-btn" aria-label="SkillBridge AI Home">
+    <img src="{{ url_for('static', filename='assets/logo.png') }}"
+         class="logo-mark"
+         alt="SkillBridge AI Logo">
+    <div class="logo-text">SkillBridge AI</div>
+    </a>
+
+   <nav id="main-nav">
+    <button class="nav-link active" data-target="predictor-view">Career Predictor</button>
+
+    <button class="nav-link" data-target="careers-view">Career Explorer</button>
+
+    <button class="nav-link" data-target="how-it-works-view">How It Works</button>
+
+    <button class="nav-link" id="open-contact-btn">Contact</button>
+
+    <button class="nav-link" id="open-feedback-btn">Feedback</button>
+
+    <button class="nav-link" data-target="about-view">About Us</button>
+   </nav>
+
+    <div class="header-actions">
+      <!-- Dark/Light Theme Toggle -->
+      <button class="theme-btn" id="theme-toggle" aria-label="Toggle Dark and Light Mode" title="Toggle Theme">
+        <svg id="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg id="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+
+      <!-- Admin Portal Button -->
+      <button class="btn-ghost-sm" id="open-admin-btn" style="font-size:12px;">Admin Portal</button>
+
+      <!-- Mobile Menu Button -->
+      <button class="menu-btn" id="mobile-menu-toggle" aria-label="Toggle navigation menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Page Content Container -->
+  <main class="wrap">
+
+    <!-- VIEW 1: PREDICTOR (MAIN APP) -->
+    <div id="predictor-view" class="view-section active">
+      
+      <!-- HERO -->
+      <section class="hero">
+        <div class="eyebrow">Model: KNN · 20 skill signals</div>
+        <h1>Tell us what you know.<br>We'll show you <span>where it leads.</span></h1>
+        <p class="sub">Select the skills you have — technical and soft. SkillBridge AI matches your profile against real career patterns and ranks where you fit best.</p>
+
+        <!-- SKILL INPUT PANEL (Flat 2D hover elevation to prevent 3D raycast click misalignment) -->
+        <div class="panel input-panel">
+          <div class="panel-head">
+            <div class="panel-title">
+              <span>Select your skills</span>
+            </div>
+            <div class="panel-controls">
+              <button class="btn-ghost-sm" id="select-all-btn">Select All</button>
+              <button class="btn-ghost-sm" id="clear-all-btn">Clear All</button>
+              <div class="panel-hint" id="skill-counter">0 / 20 selected</div>
+            </div>
+          </div>
+
+          <!-- Dynamic Skill Chips Grid -->
+          <div class="skill-grid" id="skill-chip-grid" role="group" aria-label="Skill Signal Selection">
+            <!-- Chips generated by JS -->
+          </div>
+
+          <button class="predict-btn" id="predict-trigger-btn">
+            <span>Predict my career →</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- RESULTS SECTION -->
+      <section class="results" id="results-container">
+        <div class="section-label">
+          <span>Top Career Matches</span>
+          <span style="color:var(--indigo); font-size:11px;">Click match card to inspect details</span>
+        </div>
+
+        <!-- 3 Ranked Cards (Gold, Silver, Bronze) -->
+        <div id="rank-cards-wrapper">
+          <!-- Dynamically populated via JS -->
+        </div>
+
+        <!-- Detail Grid: Readiness Stats & Missing Skills -->
+        <div class="detail-grid">
+          
+          <!-- Career Readiness Panel -->
+          <div class="panel stat-panel tilt-card">
+            <div class="section-label" id="readiness-panel-header" style="margin-bottom:12px;">Career Readiness — AI / Machine Learning Engineer</div>
+            
+            <div class="stat-row">
+              <span>Overall readiness</span>
+              <span class="val" id="readiness-pct-val">72%</span>
+            </div>
+            <div class="stat-row">
+              <span>Core skills matched</span>
+              <span class="val" id="core-matched-val">7 / 10</span>
+            </div>
+            <div class="stat-row">
+              <span>Estimated learning time</span>
+              <span class="val" id="est-time-val">3–4 months</span>
+            </div>
+            <div class="stat-row">
+              <span>Model confidence</span>
+              <span class="val" id="confidence-grade-val">High</span>
+            </div>
+          </div>
+
+          <!-- Missing Skills Panel -->
+          <div class="panel tilt-card">
+            <div class="section-label" style="margin-bottom:12px;">Missing Skills</div>
+            <div class="skill-gap-list" id="missing-skills-list">
+              <!-- Dynamically populated via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggested Learning Roadmap Panel -->
+        <div class="panel roadmap tilt-card">
+          <div class="section-label" style="margin-bottom:16px;">Suggested Learning Roadmap</div>
+          <div class="roadmap-track" id="roadmap-timeline">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+      </section>
+    </div>
+
+
+    <!-- VIEW 2: HOW IT WORKS -->
+    <div id="how-it-works-view" class="view-section">
+      <div class="how-it-works-hero">
+        <div class="eyebrow">Algorithm Specifications</div>
+        <h1 style="margin: 0 auto 16px;">How SkillBridge AI Predicts <span>Your Path</span></h1>
+        <p class="sub" style="margin: 0 auto;">SkillBridge AI converts your selected skills into a high-dimensional feature vector and calculates Euclidean cosine distances against weighted industry benchmarks.</p>
+      </div>
+
+      <!-- 4-Step Pipeline -->
+      <div class="steps-grid">
+        <div class="step-card tilt-card">
+          <div class="step-num">01</div>
+          <div class="step-title">Vectorization</div>
+          <div class="step-desc">Your 20 skill signals are mapped into a binary feature vector V = [x₁, x₂, ..., x₂₀].</div>
+        </div>
+        <div class="step-card tilt-card">
+          <div class="step-num">02</div>
+          <div class="step-title">k-NN Cluster Matching</div>
+          <div class="step-desc">The engine calculates nearest neighbor distances to 12 career centroids in target feature space.</div>
+        </div>
+        <div class="step-card tilt-card">
+          <div class="step-num">03</div>
+          <div class="step-title">Weighted Skill Analysis</div>
+          <div class="step-desc">Skill deficits are categorized as must-have (3x weight), good-to-have (1.5x), or optional (0.5x).</div>
+        </div>
+        <div class="step-card tilt-card">
+          <div class="step-num">04</div>
+          <div class="step-title">Roadmap Generation</div>
+          <div class="step-desc">Missing skills are sequenced into a multi-week timeline ordered by dependency and priority.</div>
+        </div>
+      </div>
+
+      <!-- Interactive Parameter Playground -->
+      <div class="playground-box tilt-card">
+        <div class="section-label" style="margin-bottom:16px;">KNN Model Hyperparameter Playground</div>
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>K-Nearest Neighbors (K)</span>
+            <span id="k-val-display" style="color:var(--indigo); font-weight:600;">3 Neighbors</span>
+          </div>
+          <input type="range" id="k-slider" min="1" max="5" value="3">
+        </div>
+        <div style="font-size:13px; color:var(--text-muted);">
+          Adjusting K controls the number of top career cluster rankings calculated in real time.
+        </div>
+      </div>
+    </div>
+
+
+    <!-- VIEW 3: CAREERS DIRECTORY -->
+    <div id="careers-view" class="view-section">
+      <div class="careers-header">
+        <div class="eyebrow">Industry Benchmarks</div>
+        <h1 style="margin-bottom:12px;">Explore <span>Tech Careers</span></h1>
+        <p class="sub">Browse the full catalog of benchmarked tech roles in the SkillBridge AI dataset.</p>
+      </div>
+
+      <!-- Search & Filter Controls -->
+      <div class="search-filter-bar">
+        <input type="text" id="career-search-input" class="search-input" placeholder="Search careers or skills (e.g., Python, Git)...">
+        <select id="career-category-filter" class="category-filter">
+          <option value="ALL">All Categories</option>
+          <option value="AI & Data">AI & Data</option>
+          <option value="Software Engineering">Software Engineering</option>
+          <option value="Cloud & Infrastructure">Cloud & Infrastructure</option>
+          <option value="Product & Leadership">Product & Leadership</option>
+        </select>
+      </div>
+
+      <!-- Careers Cards Grid -->
+      <div class="careers-grid" id="careers-catalog-grid">
+        <!-- Dynamically populated via JS -->
+      </div>
+    </div>
+
+
+    <!-- VIEW 4: ABOUT (MEET THE TEAM) -->
+    <div id="about-view" class="view-section">
+      <div class="about-hero" style="text-align:center; max-width:800px; margin:0 auto clamp(24px, 4vw, 40px);">
+        <div class="eyebrow">Meet the Team</div>
+        <h1 style="margin: 0 auto 16px;">Meet the Team Behind <span>SkillBridge AI</span></h1>
+        <p class="sub" style="margin: 0 auto; max-width: 680px;">The passionate minds building the future of AI-powered career guidance. SkillBridge AI is developed by a dedicated team focused on transforming career planning through Artificial Intelligence. Our mission is to bridge the gap between skills and opportunities by building intelligent, user-centric solutions that empower students, professionals, and lifelong learners to make confident career decisions.</p>
+      </div>
+
+      <!-- Team Member Cards Grid -->
+      <div class="team-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap:20px; margin-bottom:40px;">
+        
+        <!-- Team Member 1 -->
+        <div class="about-card tilt-card" style="margin-bottom:0; text-align:center; padding:28px 20px; display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <div class="team-avatar">
+            <img
+                src="{{ url_for('static', filename='assets/team/Atharva.png') }}"
+                alt="Atharva Tarte"
+                class="team-avatar-img">
+        </div>
+            <h3 style="font-family:'Space Grotesk', sans-serif; font-size:19px; font-weight:700; margin-bottom:4px;">Atharva Tarte</h3>
+            <div style="font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--green); margin-bottom:12px; font-weight:600;">Full Stack Developer (Frontend & Backend)</div>
+            <p style="color:var(--text-muted); font-size:13.5px; line-height:1.5; margin-bottom:20px;">Developed both the frontend and backend of SkillBridge AI, built responsive user interfaces, implemented backend logic, integrated APIs, managed database connectivity, and ensured a seamless, secure, and user-friendly experience.</p>
+          </div>
+          <div class="social-links" style="display:flex; justify-content:center; gap:12px;">
+            <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn" class="social-icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+            <a href="https://github.com" target="_blank" aria-label="GitHub" class="social-icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></a>
+            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=atharvatarte3@gmail.com"
+   target="_blank"
+   rel="noopener noreferrer"
+   aria-label="Email"
+   class="social-icon-btn">
+
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+    </svg>
+
+</a>
+          </div>
+        </div>
+
+<!-- Team Member 2 -->
+<div class="about-card tilt-card" style="margin-bottom:0; text-align:center; padding:28px 20px; display:flex; flex-direction:column; justify-content:space-between;">
+  <div>
+
+    <div class="team-avatar">
+        <img
+            src="{{ url_for('static', filename='assets/team/Tushar.png') }}"
+            alt="Tushar Surwade"
+            class="team-avatar-img">
+    </div>
+
+    <h3 style="font-family:'Space Grotesk', sans-serif; font-size:19px; font-weight:700; margin-bottom:4px;">
+      Tushar Surwade
+    </h3>
+
+    <div style="font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--green); margin-bottom:12px; font-weight:600;">
+      Data Engineer
+    </div>
+
+    <p style="color:var(--text-muted); font-size:13.5px; line-height:1.5; margin-bottom:20px;">
+      Collected, organized, cleaned, and prepared datasets for the recommendation system, ensuring high-quality data for accurate machine learning predictions.
+    </p>
+
+  </div>
+
+  <div class="social-links" style="display:flex; justify-content:center; gap:12px;">
+    <a href="https://www.linkedin.com/in/tushar-surwade-149296361" target="_blank" aria-label="LinkedIn" class="social-icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+            <rect x="2" y="9" width="4" height="12"/>
+            <circle cx="4" cy="4" r="2"/>
+        </svg>
+    </a>
+
+    <a href="https://github.com" target="_blank" aria-label="GitHub" class="social-icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+        </svg>
+    </a>
+
+    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=surwadetushar75@gmail.com"
+   target="_blank"
+   rel="noopener noreferrer"
+   aria-label="Email"
+   class="social-icon-btn">
+
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+    </svg>
+
+</a>
+  </div>
+</div>
+        <!-- Team Member 3 -->
+<div class="about-card tilt-card" style="margin-bottom:0; text-align:center; padding:28px 20px; display:flex; flex-direction:column; justify-content:space-between;">
+  <div>
+
+    <div class="team-avatar">
+        <img
+            src="{{ url_for('static', filename='assets/team/Tanmay.png') }}"
+            alt="Tanmay Thakare"
+            class="team-avatar-img">
+    </div>
+
+    <h3 style="font-family:'Space Grotesk', sans-serif; font-size:19px; font-weight:700; margin-bottom:4px;">
+      Tanmay Thakare
+    </h3>
+
+    <div style="font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--green); margin-bottom:12px; font-weight:600;">
+      Quality Assurance (QA) & Testing Engineer
+    </div>
+
+    <p style="color:var(--text-muted); font-size:13.5px; line-height:1.5; margin-bottom:20px;">
+      Conducted functional testing, verified application performance, identified and reported issues, and ensured the reliability and quality of SkillBridge AI before deployment.
+    </p>
+
+  </div>
+
+  <div class="social-links" style="display:flex; justify-content:center; gap:12px;">
+    <a href="https://www.linkedin.com/in/tanmay-thakare-872aab426" target="_blank" aria-label="LinkedIn" class="social-icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+            <rect x="2" y="9" width="4" height="12"/>
+            <circle cx="4" cy="4" r="2"/>
+        </svg>
+    </a>
+
+    <a href="https://github.com" target="_blank" aria-label="GitHub" class="social-icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+        </svg>
+    </a>
+
+    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=tanmaythakare3337@gmail.com"
+   target="_blank"
+   rel="noopener noreferrer"
+   aria-label="Email"
+   class="social-icon-btn">
+
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+    </svg>
+
+</a>
+  </div>
+</div>
+        <!-- Team Member 4 -->
+      <div class="about-card tilt-card" style="margin-bottom:0; text-align:center; padding:28px 20px; display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+
+          <div class="team-avatar">
+            <img src="{{ url_for('static', filename='assets/team/Aaditya.png') }}"
+                 alt="Aaditya Waghulkar"
+                 class="team-avatar-img">
+          </div>
+            <h3 style="font-family:'Space Grotesk', sans-serif; font-size:19px; font-weight:700; margin-bottom:4px;">Aaditya Waghulkar</h3>
+            <div style="font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--green); margin-bottom:12px; font-weight:600;">Machine Learning Engineer</div>
+              <p style="color:var(--text-muted); font-size:13.5px; line-height:1.5; margin-bottom:20px;">Developed and integrated the K-Nearest Neighbors (KNN) recommendation model, optimized the prediction workflow, validated model performance, and contributed to AI integration and system testing.</p>
+            </div>
+          <div class="social-links" style="display:flex; justify-content:center; gap:12px;">
+            <a href="https://www.linkedin.com/in/aaditya-waghulkar-02b547347" target="_blank" aria-label="LinkedIn" class="social-icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+            <a href="https://github.com" target="_blank" aria-label="GitHub" class="social-icon-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></a>
+            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=aadityawaghulkar@gmail.com"
+   target="_blank"
+   rel="noopener noreferrer"
+   aria-label="Email"
+   class="social-icon-btn">
+
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+    </svg>
+
+</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL 0: SKILLS REQUIRED VALIDATION WARNING MODAL -->
+  <div class="modal-overlay" id="validation-warning-modal">
+    <div class="modal-card validation-warning-card" style="max-width:440px; text-align:center;">
+      <div style="width:52px; height:52px; border-radius:50%; background:rgba(240, 172, 78, 0.15); border:1px solid var(--amber); color:var(--amber); font-size:26px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+        ⚠️
+      </div>
+      <h3 style="font-family:'Space Grotesk', sans-serif; font-size:20px; font-weight:700; margin-bottom:10px; color:var(--text-primary);">Skills Required</h3>
+      <p style="color:var(--text-muted); font-size:14.5px; line-height:1.5; margin-bottom:24px;">Please select at least one skill before generating a prediction.</p>
+      <button class="predict-btn" data-close="validation-warning-modal" style="width:100%; justify-content:center;">Got it</button>
+    </div>
+  </div>
+
+  <!-- MODAL 1: CONTACT FORM -->
+  <div class="modal-overlay" id="contact-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Contact SkillBridge AI Team</div>
+        <button class="modal-close" data-close="contact-modal">&times;</button>
+      </div>
+      <form id="contact-form">
+        <div class="form-group">
+          <label class="form-label">FULL NAME</label>
+          <input type="text" id="contact-name" class="form-input" placeholder="e.g. Sarah Connor" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">EMAIL ADDRESS</label>
+          <input type="email" id="contact-email" class="form-input" placeholder="e.g. sarah@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">SUBJECT</label>
+          <input type="text" id="contact-subject" class="form-input" placeholder="e.g. Career Prediction Partnership">
+        </div>
+        <div class="form-group">
+          <label class="form-label">MESSAGE</label>
+          <textarea id="contact-message" class="form-textarea" placeholder="Write your message here..." required></textarea>
+        </div>
+        <button type="submit" class="predict-btn" id="contact-submit-btn" style="width:100%; justify-content:center; margin-top:10px;">
+          <span>Send Message →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: FEEDBACK FORM -->
+  <div class="modal-overlay" id="feedback-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Submit Prediction Feedback</div>
+        <button class="modal-close" data-close="feedback-modal">&times;</button>
+      </div>
+      <form id="feedback-form">
+        <div class="form-group">
+          <label class="form-label">TOOL RATING</label>
+          <div class="star-rating" id="star-rating-picker">
+            <span class="star active" data-val="1">★</span>
+            <span class="star active" data-val="2">★</span>
+            <span class="star active" data-val="3">★</span>
+            <span class="star active" data-val="4">★</span>
+            <span class="star active" data-val="5">★</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">CATEGORY</label>
+          <select id="feedback-category" class="form-select">
+            <option value="prediction_accuracy">Prediction Accuracy</option>
+            <option value="ui_ux">UI / User Experience</option>
+            <option value="missing_skills">Skill Dataset Coverage</option>
+            <option value="feature_request">Feature Request</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">YOUR COMMENTS</label>
+          <textarea id="feedback-comment" class="form-textarea" placeholder="How accurate were your top career matches?" required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">EMAIL (OPTIONAL)</label>
+          <input type="email" id="feedback-email" class="form-input" placeholder="For follow-up updates...">
+        </div>
+        <button type="submit" class="predict-btn" id="feedback-submit-btn" style="width:100%; justify-content:center; margin-top:10px;">
+          <span>Submit Feedback →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: ADMIN LOGIN -->
+  <div class="modal-overlay" id="admin-login-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Admin Portal Authentication</div>
+        <button class="modal-close" data-close="admin-login-modal">&times;</button>
+      </div>
+      <form id="admin-login-form">
+        <div class="form-group">
+          <label class="form-label">USERNAME</label>
+          <input type="text" id="admin-username" class="form-input" value="admin" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">PASSWORD</label>
+          <input type="password" id="admin-password" class="form-input" placeholder="Enter admin password" required>
+        </div>
+        <button type="submit" class="predict-btn" id="admin-login-submit-btn" style="width:100%; justify-content:center; margin-top:10px;">
+          <span>Authenticate & Login →</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: ADMIN DASHBOARD OVERLAY -->
+  <div class="modal-overlay" id="admin-dashboard-modal">
+    <div class="modal-card admin-card-lg">
+      <div class="modal-header">
+        <div class="modal-title" style="display:flex; align-items:center; gap:10px;">
+          <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="SkillBridge AI Mark" style="width:28px; height:28px; border-radius:50%;">
+          <span>SkillBridge AI Admin Control Panel</span>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <a href="/api/v1/admin/subscribers/export" id="export-csv-link" class="btn-ghost-sm" target="_blank">Export Subscribers (CSV)</a>
+          <button class="modal-close" data-close="admin-dashboard-modal">&times;</button>
+        </div>
+      </div>
+
+      <!-- Dashboard Stats Cards Grid -->
+      <div class="admin-stats-grid">
+        <div class="admin-stat-card tilt-card">
+          <div class="admin-stat-num" id="admin-stat-predictions">0</div>
+          <div class="admin-stat-label">Total Predictions</div>
+        </div>
+        <div class="admin-stat-card tilt-card">
+          <div class="admin-stat-num" id="admin-stat-contacts">0</div>
+          <div class="admin-stat-label">Contact Messages</div>
+        </div>
+        <div class="admin-stat-card tilt-card">
+          <div class="admin-stat-num" id="admin-stat-feedback">0</div>
+          <div class="admin-stat-label">Feedback Entries</div>
+        </div>
+        <div class="admin-stat-card tilt-card">
+          <div class="admin-stat-num" id="admin-stat-subscribers">0</div>
+          <div class="admin-stat-label">Subscribers</div>
+        </div>
+      </div>
+
+      <!-- Outbox Queue Section -->
+      <div style="margin-bottom:20px;">
+        <div class="section-label">Email Outbox Dispatch Queue</div>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Recipient</th>
+                <th>Subject</th>
+                <th>Form</th>
+                <th>Status</th>
+                <th>Attempts</th>
+              </tr>
+            </thead>
+            <tbody id="admin-queue-table-body">
+              <tr><td colspan="6" style="color:var(--text-faint);">Loading outbox queue...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Predictions Table -->
+      <div style="margin-bottom:20px;">
+        <div class="section-label">Recent Prediction Log Sessions</div>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Top Career</th>
+                <th>Match %</th>
+                <th>Readiness</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="admin-predictions-table-body">
+              <tr><td colspan="5" style="color:var(--text-faint);">Loading prediction sessions...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Contact Submissions -->
+      <div>
+        <div class="section-label">Recent Contact Submissions</div>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Subject</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="admin-contacts-table-body">
+              <tr><td colspan="4" style="color:var(--text-faint);">No contact submissions yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer with Premium Aligned Newsletter Subscribe Form -->
+  <footer>
+    <div style="max-width:480px; margin:0 auto 24px; text-align:center;">
+      <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:14px;">
+        <img src="{{ url_for('static', filename='assets/logo-icon.png') }}" alt="SkillBridge AI Logo" style="width:32px; height:32px; border-radius:50%; box-shadow:0 0 15px var(--indigo-glow);">
+        <span style="font-family:'Space Grotesk'; font-size:17px; font-weight:700; color:var(--text-primary);">SkillBridge AI Insights</span>
+      </div>
+      <form id="newsletter-form" style="display:flex; gap:10px; align-items:center;">
+        <input type="email" id="newsletter-email" class="form-input search-input" placeholder="Enter your email address..." required style="flex:1; min-height:48px; border-radius:18px;">
+        <button type="submit" class="predict-btn" id="newsletter-submit-btn" style="padding:12px 24px; font-size:14px; min-height:48px; border-radius:18px; width:auto; flex-shrink:0;">
+          <span>Subscribe</span>
+        </button>
+      </form>
+    </div>
+    <div>SkillBridge AI — Production AI Skill Gap Analyzer & KNN Prediction Engine</div>
+    <div style="margin-top:6px; color:var(--text-muted); font-size:11px;">Group Project Prototype · 20 Skill Signals · 12 Career Vectors</div>
+  </footer>
+
+  <!-- Universal Application Scripts (Compatible with file:// and http://) -->
+<script src="{{ url_for('static', filename='js/ui_engine.js') }}"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+</html>
