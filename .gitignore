@@ -1,26 +1,18 @@
 # Python
+venv/
 __pycache__/
 *.py[cod]
 
-# Virtual Environment
-venv/
+# Environment
 .env
 
-# VS Code
+# IDEs
 .vscode/
-
-# PyCharm
 .idea/
 
-# macOS
-.DS_Store
-
-# Windows
-Thumbs.db
-
-# Model cache
+# Logs
 *.log
 
-# Build
-dist/
-build/
+# OS files
+.DS_Store
+Thumbs.db
