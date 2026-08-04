@@ -761,33 +761,45 @@
         e.preventDefault();
         handleFormSubmitAnimation(elements.feedbackSubmitBtn, async () => {
           const payload = {
+            name: document.getElementById('feedback-name').value,
             rating: state.feedbackRating,
             category: document.getElementById('feedback-category').value,
-            comment: document.getElementById('feedback-comment').value,
-            user_email: document.getElementById('feedback-email').value
+            feedback: document.getElementById('feedback-comment').value,
+            suggestion: document.getElementById('feedback-suggestion').value,
+            email: document.getElementById('feedback-email').value
           };
 
-          if (isWebServer) {
-            try {
-              const res = await fetch('/api/v1/feedback', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-              });
-              const data = await res.json();
-              if (res.ok) {
-                showToast(data.message || 'Feedback submitted & email notification sent!');
-                elements.feedbackForm.reset();
-                closeModal('feedback-modal');
-                return true;
-              }
-            } catch (err) {}
+          // Basic client-side check before hitting the server — the
+          // server re-validates everything anyway (same pattern as contact form).
+          if (!payload.name.trim() || !payload.feedback.trim()) {
+            showToast('Please enter your name and feedback.', 'error');
+            return false;
           }
 
-          showToast('Thank you for your valuable feedback!');
-          elements.feedbackForm.reset();
-          closeModal('feedback-modal');
-          return true;
+          try {
+            const res = await fetch('/api/v1/feedback', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+              showToast(data.message || 'Thank you for your feedback!');
+              elements.feedbackForm.reset();
+              closeModal('feedback-modal');
+              return true;
+            }
+
+            // Server responded but rejected the submission (validation error)
+            showToast(data.error || 'Something went wrong. Please try again.', 'error');
+            return false;
+
+          } catch (err) {
+            // Network / server unreachable — tell the user honestly
+            showToast('Could not reach the server. Please check your connection and try again.', 'error');
+            return false;
+          }
         });
       });
     }
