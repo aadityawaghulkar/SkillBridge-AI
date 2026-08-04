@@ -720,27 +720,38 @@
             message: document.getElementById('contact-message').value
           };
 
-          if (isWebServer) {
-            try {
-              const res = await fetch('/api/v1/contact', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-              });
-              const data = await res.json();
-              if (res.ok) {
-                showToast(data.message || 'Message sent successfully! Confirmation email dispatched.');
-                elements.contactForm.reset();
-                closeModal('contact-modal');
-                return true;
-              }
-            } catch (err) {}
+          // Basic client-side check before hitting the server — the
+          // server re-validates everything anyway, this just avoids
+          // an unnecessary round trip for an obviously empty form.
+          if (!payload.name.trim() || !payload.email.trim() || !payload.message.trim()) {
+            showToast('Please fill in your name, email, and message.', 'error');
+            return false;
           }
 
-          showToast('Thank you! Your message has been logged & queued for email delivery.');
-          elements.contactForm.reset();
-          closeModal('contact-modal');
-          return true;
+          try {
+            const res = await fetch('/api/v1/contact', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+              showToast(data.message || 'Message sent successfully!');
+              elements.contactForm.reset();
+              closeModal('contact-modal');
+              return true;
+            }
+
+            // Server responded but rejected the submission (validation error)
+            showToast(data.error || 'Something went wrong. Please try again.', 'error');
+            return false;
+
+          } catch (err) {
+            // Network / server unreachable — tell the user honestly
+            showToast('Could not reach the server. Please check your connection and try again.', 'error');
+            return false;
+          }
         });
       });
     }
