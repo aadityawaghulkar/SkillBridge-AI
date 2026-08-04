@@ -88,9 +88,7 @@
       feedbackForm: document.getElementById('feedback-form'),
       feedbackSubmitBtn: document.getElementById('feedback-submit-btn'),
       adminLoginForm: document.getElementById('admin-login-form'),
-      adminLoginSubmitBtn: document.getElementById('admin-login-submit-btn'),
-      newsletterForm: document.getElementById('newsletter-form'),
-      newsletterSubmitBtn: document.getElementById('newsletter-submit-btn')
+      adminLoginSubmitBtn: document.getElementById('admin-login-submit-btn')
     };
   }
 
@@ -800,56 +798,6 @@
             showToast('Could not reach the server. Please check your connection and try again.', 'error');
             return false;
           }
-        });
-      });
-    }
-
-    if (elements.newsletterForm) {
-      elements.newsletterForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        handleFormSubmitAnimation(elements.newsletterSubmitBtn, async () => {
-          const emailInput = document.getElementById('newsletter-email');
-          const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
-
-          if (!email || !email.includes('@')) {
-            showToast('Please enter a valid email address.', 'error');
-            return false;
-          }
-
-          if (isWebServer) {
-            try {
-              const res = await fetch('/api/v1/newsletter', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-              });
-              const data = await res.json();
-
-              if (data.status === 'duplicate') {
-                showToast(data.message || 'This email is already subscribed to SkillBridge AI updates.', 'duplicate');
-                return 'duplicate';
-              } else if (res.ok || data.status === 'success') {
-                showToast(data.message || 'Thank you! You have successfully subscribed to SkillBridge AI.');
-                elements.newsletterForm.reset();
-                return true;
-              } else {
-                showToast(data.error || 'Subscription failed. Please try again.', 'error');
-                return false;
-              }
-            } catch (err) {}
-          }
-
-          // Fallback for file:// static mode
-          const localSubscribers = JSON.parse(localStorage.getItem('SkillBridge AI_subscribers') || '[]');
-          if (localSubscribers.includes(email)) {
-            showToast('This email is already subscribed to SkillBridge AI updates.', 'duplicate');
-            return 'duplicate';
-          }
-          localSubscribers.push(email);
-          localStorage.setItem('SkillBridge AI_subscribers', JSON.stringify(localSubscribers));
-          showToast('Thank you! You have successfully subscribed to SkillBridge AI.');
-          elements.newsletterForm.reset();
-          return true;
         });
       });
     }

@@ -1715,9 +1715,6 @@ footer {
   .modal-card {
     padding: 20px 16px;
   }
-  footer form#newsletter-form {
-    flex-direction: column;
-  }
 }
 
 /* Ultra Small Phones (320px - 360px) */
