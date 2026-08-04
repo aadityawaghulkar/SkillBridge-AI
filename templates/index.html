@@ -102,9 +102,6 @@
         <svg id="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
 
-      <!-- Admin Portal Button -->
-      <button class="btn-ghost-sm" id="open-admin-btn" style="font-size:12px;">Admin Portal</button>
-
       <!-- Mobile Menu Button -->
       <button class="menu-btn" id="mobile-menu-toggle" aria-label="Toggle navigation menu">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -519,6 +516,10 @@
       </div>
       <form id="feedback-form">
         <div class="form-group">
+          <label class="form-label">FULL NAME</label>
+          <input type="text" id="feedback-name" class="form-input" placeholder="e.g. Sarah Connor" required>
+        </div>
+        <div class="form-group">
           <label class="form-label">TOOL RATING</label>
           <div class="star-rating" id="star-rating-picker">
             <span class="star active" data-val="1">★</span>
@@ -542,6 +543,10 @@
           <textarea id="feedback-comment" class="form-textarea" placeholder="How accurate were your top career matches?" required></textarea>
         </div>
         <div class="form-group">
+          <label class="form-label">SUGGESTION (OPTIONAL)</label>
+          <textarea id="feedback-suggestion" class="form-textarea" placeholder="Anything you'd like us to add or improve?"></textarea>
+        </div>
+        <div class="form-group">
           <label class="form-label">EMAIL (OPTIONAL)</label>
           <input type="email" id="feedback-email" class="form-input" placeholder="For follow-up updates...">
         </div>
@@ -552,142 +557,13 @@
     </div>
   </div>
 
-  <!-- MODAL 3: ADMIN LOGIN -->
-  <div class="modal-overlay" id="admin-login-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">Admin Portal Authentication</div>
-        <button class="modal-close" data-close="admin-login-modal">&times;</button>
-      </div>
-      <form id="admin-login-form">
-        <div class="form-group">
-          <label class="form-label">USERNAME</label>
-          <input type="text" id="admin-username" class="form-input" value="admin" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">PASSWORD</label>
-          <input type="password" id="admin-password" class="form-input" placeholder="Enter admin password" required>
-        </div>
-        <button type="submit" class="predict-btn" id="admin-login-submit-btn" style="width:100%; justify-content:center; margin-top:10px;">
-          <span>Authenticate & Login →</span>
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 4: ADMIN DASHBOARD OVERLAY -->
-  <div class="modal-overlay" id="admin-dashboard-modal">
-    <div class="modal-card admin-card-lg">
-      <div class="modal-header">
-        <div class="modal-title" style="display:flex; align-items:center; gap:10px;">
-          <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="SkillBridge AI Mark" style="width:28px; height:28px; border-radius:50%;">
-          <span>SkillBridge AI Admin Control Panel</span>
-        </div>
-        <div style="display:flex; gap:10px; align-items:center;">
-          <a href="/api/v1/admin/subscribers/export" id="export-csv-link" class="btn-ghost-sm" target="_blank">Export Subscribers (CSV)</a>
-          <button class="modal-close" data-close="admin-dashboard-modal">&times;</button>
-        </div>
-      </div>
-
-      <!-- Dashboard Stats Cards Grid -->
-      <div class="admin-stats-grid">
-        <div class="admin-stat-card tilt-card">
-          <div class="admin-stat-num" id="admin-stat-predictions">0</div>
-          <div class="admin-stat-label">Total Predictions</div>
-        </div>
-        <div class="admin-stat-card tilt-card">
-          <div class="admin-stat-num" id="admin-stat-contacts">0</div>
-          <div class="admin-stat-label">Contact Messages</div>
-        </div>
-        <div class="admin-stat-card tilt-card">
-          <div class="admin-stat-num" id="admin-stat-feedback">0</div>
-          <div class="admin-stat-label">Feedback Entries</div>
-        </div>
-        <div class="admin-stat-card tilt-card">
-          <div class="admin-stat-num" id="admin-stat-subscribers">0</div>
-          <div class="admin-stat-label">Subscribers</div>
-        </div>
-      </div>
-
-      <!-- Outbox Queue Section -->
-      <div style="margin-bottom:20px;">
-        <div class="section-label">Email Outbox Dispatch Queue</div>
-        <div class="table-responsive">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Recipient</th>
-                <th>Subject</th>
-                <th>Form</th>
-                <th>Status</th>
-                <th>Attempts</th>
-              </tr>
-            </thead>
-            <tbody id="admin-queue-table-body">
-              <tr><td colspan="6" style="color:var(--text-faint);">Loading outbox queue...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Recent Predictions Table -->
-      <div style="margin-bottom:20px;">
-        <div class="section-label">Recent Prediction Log Sessions</div>
-        <div class="table-responsive">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Top Career</th>
-                <th>Match %</th>
-                <th>Readiness</th>
-                <th>Timestamp</th>
-              </tr>
-            </thead>
-            <tbody id="admin-predictions-table-body">
-              <tr><td colspan="5" style="color:var(--text-faint);">Loading prediction sessions...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Recent Contact Submissions -->
-      <div>
-        <div class="section-label">Recent Contact Submissions</div>
-        <div class="table-responsive">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Subject</th>
-                <th>Timestamp</th>
-              </tr>
-            </thead>
-            <tbody id="admin-contacts-table-body">
-              <tr><td colspan="4" style="color:var(--text-faint);">No contact submissions yet.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Footer with Premium Aligned Newsletter Subscribe Form -->
+  <!-- Footer with Branding -->
   <footer>
     <div style="max-width:480px; margin:0 auto 24px; text-align:center;">
       <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:14px;">
         <img src="{{ url_for('static', filename='assets/logo-icon.png') }}" alt="SkillBridge AI Logo" style="width:32px; height:32px; border-radius:50%; box-shadow:0 0 15px var(--indigo-glow);">
         <span style="font-family:'Space Grotesk'; font-size:17px; font-weight:700; color:var(--text-primary);">SkillBridge AI Insights</span>
       </div>
-      <form id="newsletter-form" style="display:flex; gap:10px; align-items:center;">
-        <input type="email" id="newsletter-email" class="form-input search-input" placeholder="Enter your email address..." required style="flex:1; min-height:48px; border-radius:18px;">
-        <button type="submit" class="predict-btn" id="newsletter-submit-btn" style="padding:12px 24px; font-size:14px; min-height:48px; border-radius:18px; width:auto; flex-shrink:0;">
-          <span>Subscribe</span>
-        </button>
-      </form>
     </div>
     <div>SkillBridge AI — Production AI Skill Gap Analyzer & KNN Prediction Engine</div>
     <div style="margin-top:6px; color:var(--text-muted); font-size:11px;">Group Project Prototype · 20 Skill Signals · 12 Career Vectors</div>
