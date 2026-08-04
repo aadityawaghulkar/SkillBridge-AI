@@ -17,7 +17,6 @@
     lastPrediction: null,
     currentView: 'predictor-view',
     theme: getInitialTheme(),
-    authToken: localStorage.getItem('SkillBridge AI_admin_token') || '',
     feedbackRating: 5
   };
 
@@ -75,20 +74,15 @@
       // Modals & Buttons
       openContactBtn: document.getElementById('open-contact-btn'),
       openFeedbackBtn: document.getElementById('open-feedback-btn'),
-      openAdminBtn: document.getElementById('open-admin-btn'),
 
       contactModal: document.getElementById('contact-modal'),
       feedbackModal: document.getElementById('feedback-modal'),
-      adminLoginModal: document.getElementById('admin-login-modal'),
-      adminDashboardModal: document.getElementById('admin-dashboard-modal'),
 
       // Forms & Submit Buttons
       contactForm: document.getElementById('contact-form'),
       contactSubmitBtn: document.getElementById('contact-submit-btn'),
       feedbackForm: document.getElementById('feedback-form'),
-      feedbackSubmitBtn: document.getElementById('feedback-submit-btn'),
-      adminLoginForm: document.getElementById('admin-login-form'),
-      adminLoginSubmitBtn: document.getElementById('admin-login-submit-btn')
+      feedbackSubmitBtn: document.getElementById('feedback-submit-btn')
     };
   }
 
@@ -224,7 +218,7 @@
 
       if (target.closest('button, .predict-btn, .btn-ghost-sm, .theme-btn, .skill-chip')) {
         body.classList.add('cursor-hover-button');
-      } else if (target.closest('.tilt-card, .rank-card, .career-catalog-card, .step-card, .about-card, .admin-stat-card, .playground-box')) {
+      } else if (target.closest('.tilt-card, .rank-card, .career-catalog-card, .step-card, .about-card, .playground-box')) {
         body.classList.add('cursor-hover-card');
       } else if (target.closest('a, .nav-link, .logo')) {
         body.classList.add('cursor-hover-link');
@@ -273,14 +267,14 @@
     };
 
     document.addEventListener('mousemove', (e) => {
-      const card = e.target.closest('.tilt-card, .rank-card, .career-catalog-card, .step-card, .about-card, .admin-stat-card, .playground-box');
+      const card = e.target.closest('.tilt-card, .rank-card, .career-catalog-card, .step-card, .about-card, .playground-box');
       if (card) {
         updateTilt(e, card);
       }
     });
 
     document.addEventListener('mouseout', (e) => {
-      const card = e.target.closest('.tilt-card, .rank-card, .career-catalog-card, .step-card, .about-card, .admin-stat-card, .playground-box');
+      const card = e.target.closest('.tilt-card, .rank-card, .career-catalog-card, .step-card, .about-card, .playground-box');
       if (card && (!e.relatedTarget || !card.contains(e.relatedTarget))) {
         resetTilt(card);
       }
@@ -585,16 +579,6 @@
 
     if (elements.openContactBtn) elements.openContactBtn.addEventListener('click', () => openModal('contact-modal'));
     if (elements.openFeedbackBtn) elements.openFeedbackBtn.addEventListener('click', () => openModal('feedback-modal'));
-    
-    if (elements.openAdminBtn) {
-      elements.openAdminBtn.addEventListener('click', () => {
-        if (state.authToken || !isWebServer) {
-          fetchAdminDashboard();
-        } else {
-          openModal('admin-login-modal');
-        }
-      });
-    }
   }
 
   function openModal(modalId) {
@@ -800,138 +784,6 @@
           }
         });
       });
-    }
-
-    if (elements.adminLoginForm) {
-      elements.adminLoginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        handleFormSubmitAnimation(elements.adminLoginSubmitBtn, async () => {
-          const username = document.getElementById('admin-username').value;
-          const password = document.getElementById('admin-password').value;
-
-          if (isWebServer) {
-            try {
-              const res = await fetch('/api/v1/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-              });
-              const data = await res.json();
-              if (res.ok && data.token) {
-                state.authToken = data.token;
-                localStorage.setItem('SkillBridge AI_admin_token', data.token);
-                showToast('Admin authentication successful!');
-                closeModal('admin-login-modal');
-                fetchAdminDashboard();
-                return true;
-              }
-            } catch (err) {}
-          }
-
-          if (password === 'admin123') {
-            state.authToken = 'local_admin_session_token';
-            localStorage.setItem('SkillBridge AI_admin_token', state.authToken);
-            showToast('Admin authentication successful!');
-            closeModal('admin-login-modal');
-            fetchAdminDashboard();
-            return true;
-          } else {
-            showToast('Invalid admin password. (Default: admin123)', 'error');
-            return false;
-          }
-        });
-      });
-    }
-  }
-
-  async function fetchAdminDashboard() {
-    let stats = { totalPredictions: 0, totalContacts: 0, totalFeedback: 0, totalSubscribers: 0 };
-    let recentPredictions = [];
-    let recentContacts = [];
-    let emailQueue = [];
-
-    if (isWebServer && state.authToken && state.authToken !== 'local_admin_session_token') {
-      try {
-        const res = await fetch('/api/v1/admin/dashboard', {
-          headers: { 'Authorization': `Bearer ${state.authToken}` }
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          stats = data.stats || stats;
-          recentPredictions = data.recentPredictions || [];
-          recentContacts = data.recentContacts || [];
-          emailQueue = data.emailQueue || [];
-        }
-      } catch (err) {}
-    }
-
-    openModal('admin-dashboard-modal');
-
-    document.getElementById('admin-stat-predictions').textContent = stats.totalPredictions || 0;
-    document.getElementById('admin-stat-contacts').textContent = stats.totalContacts || 0;
-    document.getElementById('admin-stat-feedback').textContent = stats.totalFeedback || 0;
-    document.getElementById('admin-stat-subscribers').textContent = stats.totalSubscribers || 0;
-
-    const queueBody = document.getElementById('admin-queue-table-body');
-    if (queueBody) {
-      queueBody.innerHTML = '';
-      if (emailQueue.length > 0) {
-        emailQueue.forEach(item => {
-          const tr = document.createElement('tr');
-          const statusStyle = item.status === 'sent' ? 'color:var(--green); font-weight:600;' : 'color:var(--amber); font-weight:600;';
-          tr.innerHTML = `
-            <td>#${item.id}</td>
-            <td>${item.recipient}</td>
-            <td><strong>${item.subject}</strong></td>
-            <td>${item.form_type}</td>
-            <td style="${statusStyle}">${item.status}</td>
-            <td>${item.attempts}</td>
-          `;
-          queueBody.appendChild(tr);
-        });
-      } else {
-        queueBody.innerHTML = `<tr><td colspan="6" style="color:var(--text-faint);">No outbox queue logs recorded yet.</td></tr>`;
-      }
-    }
-
-    const predBody = document.getElementById('admin-predictions-table-body');
-    if (predBody) {
-      predBody.innerHTML = '';
-      if (recentPredictions.length > 0) {
-        recentPredictions.forEach(pred => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>#${pred.id}</td>
-            <td><strong>${pred.top_career_title || 'N/A'}</strong></td>
-            <td>${pred.match_pct}%</td>
-            <td>${pred.overall_readiness}%</td>
-            <td>${pred.created_at || ''}</td>
-          `;
-          predBody.appendChild(tr);
-        });
-      } else {
-        predBody.innerHTML = `<tr><td colspan="5" style="color:var(--text-muted);">No prediction sessions logged yet.</td></tr>`;
-      }
-    }
-
-    const contactBody = document.getElementById('admin-contacts-table-body');
-    if (contactBody) {
-      contactBody.innerHTML = '';
-      if (recentContacts.length > 0) {
-        recentContacts.forEach(msg => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${msg.name}</td>
-            <td>${msg.email}</td>
-            <td>${msg.subject || 'General'}</td>
-            <td>${msg.created_at || ''}</td>
-          `;
-          contactBody.appendChild(tr);
-        });
-      } else {
-        contactBody.innerHTML = `<tr><td colspan="4" style="color:var(--text-muted);">No contact submissions yet.</td></tr>`;
-      }
     }
   }
 

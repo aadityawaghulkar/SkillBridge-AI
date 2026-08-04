@@ -1537,64 +1537,6 @@ footer {
 .star-rating .star { transition: color 0.15s ease; padding: 4px; }
 .star-rating .star.active { color: var(--amber); }
 
-/* Admin Dashboard Overlay */
-.admin-card-lg {
-  width: min(95vw, 980px);
-}
-.admin-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
-  gap: 14px;
-  margin-bottom: 24px;
-  width: 100%;
-}
-.admin-stat-card {
-  background: var(--bg-panel-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 16px;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.admin-stat-card:hover {
-  transform: translateY(-8px);
-}
-
-.admin-stat-num {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--green);
-}
-.admin-stat-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.admin-table {
-  width: 100%;
-  min-width: 520px;
-  border-collapse: collapse;
-  font-size: 12.5px;
-  font-family: 'JetBrains Mono', monospace;
-  margin-top: 10px;
-}
-.admin-table th, .admin-table td {
-  padding: 10px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--line);
-}
-.admin-table th {
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
 /* ==========================================================================
    COMPREHENSIVE RESPONSIVE BREAKPOINTS (320px Mobile up to 2560px 4K)
    ========================================================================== */
